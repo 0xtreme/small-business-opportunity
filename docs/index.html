@@ -3,75 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AU Small Business Opportunity Finder</title>
+    <title>Small Business Opportunity - Australia</title>
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   </head>
   <body>
-    <main class="page">
-      <header class="hero">
-        <h1>Australia Small Business Opportunity Finder</h1>
+    <div id="map"></div>
+
+    <div id="loading" class="loading-screen">
+      <div class="spinner"></div>
+      <p id="loadingText">Loading official ABS datasets...</p>
+    </div>
+
+    <header class="top-nav glass">
+      <div>
+        <h1>Small Business Opportunity - Australia</h1>
         <p>
-          Opportunity scores are derived from official ABS datasets only: business counts by SA2,
-          Census family/income indicators, and SA2 population.
+          Interactive SA2 opportunity map using official ABS business, Census, and population data.
         </p>
-        <p id="metaLine" class="meta"></p>
-      </header>
+      </div>
+      <nav class="top-links">
+        <a href="./sources.md" class="sources-link" target="_blank" rel="noreferrer">Data sources</a>
+        <a href="./design-requirements.md" class="sources-link" target="_blank" rel="noreferrer">Design requirements</a>
+        <a href="./architecture.md" class="sources-link" target="_blank" rel="noreferrer">Architecture</a>
+      </nav>
+    </header>
 
-      <section class="controls">
-        <label>
-          State or territory
-          <select id="stateSelect"></select>
-        </label>
+    <aside class="left-panel glass">
+      <section>
+        <h2 id="selectedTitle">Select an SA2</h2>
+        <p id="selectedMeta" class="muted">Click any SA2 polygon on the map to inspect details.</p>
 
-        <label>
-          Industry
-          <select id="industrySelect"></select>
-        </label>
+        <div class="metric-grid" id="selectedMetrics"></div>
 
-        <label>
-          Search SA2
-          <input id="searchInput" type="text" placeholder="e.g. Parramatta" />
-        </label>
+        <h3>Top Suggested Industries</h3>
+        <div id="topIndustryList" class="industry-list"></div>
       </section>
 
-      <section class="cards" id="summaryCards"></section>
-
-      <section class="panel">
-        <h2>Top SA2 Opportunity Scores</h2>
-        <div id="rankingChart" class="chart"></div>
+      <section>
+        <h3>What Is SA2?</h3>
+        <p class="muted small">
+          SA2 means Statistical Area Level 2, an official ABS geography used for regional analysis.
+          It usually represents communities with social and economic interaction.
+        </p>
       </section>
 
-      <section class="panel">
-        <h2>Industry Gap vs Demand (SA2)</h2>
-        <div id="industryScatter" class="chart"></div>
+      <section>
+        <h3>How To Read The Map</h3>
+        <ul class="small muted">
+          <li>Darker/brighter fill means higher opportunity score for selected industry.</li>
+          <li>Score combines unmet business supply and local demand indicators.</li>
+          <li>Use filters to narrow to one state, industry, or suburb search.</li>
+        </ul>
       </section>
 
-      <section class="panel">
-        <h2>Top Suburb-Level Opportunities</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>SA2</th>
-                <th>State</th>
-                <th>Population</th>
-                <th>Top Industry Suggestions</th>
-                <th>Opportunity Score</th>
-              </tr>
-            </thead>
-            <tbody id="rankingTableBody"></tbody>
-          </table>
+      <section>
+        <h3>Metric Glossary</h3>
+        <ul class="small muted">
+          <li>Demand index: 0-1 blend of family composition, family income, and one-year growth.</li>
+          <li>Underserved businesses: expected businesses minus observed businesses (floor at zero).</li>
+          <li>Opportunity score: underserved businesses multiplied by demand factor.</li>
+        </ul>
+      </section>
+    </aside>
+
+    <aside class="right-panel glass">
+      <h3>Filters</h3>
+
+      <label>
+        State or territory
+        <select id="stateSelect"></select>
+      </label>
+
+      <label>
+        Industry layer
+        <select id="industrySelect"></select>
+      </label>
+
+      <label>
+        Search SA2
+        <input id="searchInput" type="text" placeholder="Type SA2 name" />
+      </label>
+
+      <div class="legend">
+        <p class="legend-title">Opportunity score (selected industry)</p>
+        <div class="legend-bar"></div>
+        <div class="legend-scale">
+          <span>Low</span>
+          <span>High</span>
         </div>
-      </section>
+      </div>
 
-      <footer class="footer">
-        <p>
-          Data source and method notes: <a href="./sources.md" target="_blank" rel="noreferrer">docs/sources.md</a>
-        </p>
-      </footer>
-    </main>
+      <p id="metaLine" class="small muted"></p>
+    </aside>
+
+    <section class="bottom-panel glass">
+      <div class="chart-wrap">
+        <h3>Top SA2 Scores (Selected Industry)</h3>
+        <div id="scoreChart" class="chart"></div>
+      </div>
+      <div class="chart-wrap">
+        <h3>Demand vs Underserved Businesses</h3>
+        <div id="evidenceChart" class="chart"></div>
+      </div>
+    </section>
+
+    <div id="tooltip" class="tooltip hidden"></div>
 
     <script type="module" src="./app.js"></script>
   </body>

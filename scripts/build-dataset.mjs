@@ -12,6 +12,7 @@ const projectRoot = path.resolve(__dirname, '..');
 const RAW_DIR = path.join(projectRoot, 'data', 'raw');
 const PROCESSED_DIR = path.join(projectRoot, 'data', 'processed');
 const PUBLIC_DATA_DIR = path.join(projectRoot, 'public', 'data');
+const DOCS_DATA_DIR = path.join(projectRoot, 'docs', 'data');
 
 const RAW_FILES = {
   businessCube8: path.join(RAW_DIR, 'cabee_data_cube_8_jun2025.xlsx'),
@@ -390,6 +391,7 @@ function summarizeIndustryRows(rows) {
 async function main() {
   ensureDirectory(PROCESSED_DIR);
   ensureDirectory(PUBLIC_DATA_DIR);
+  ensureDirectory(DOCS_DATA_DIR);
 
   console.log('Parsing business supply data (ABS Data cube 8)...');
   const { businessRows, sa2NameByCode, referenceYear } = extractBusinessRows();
@@ -632,6 +634,16 @@ async function main() {
     .sort((a, b) => b.opportunity_score - a.opportunity_score)
     .slice(0, 5000);
 
+  const industrySa2Scores = focusOpportunities.map((row) => ({
+    sa2_code: row.sa2_code,
+    industry_code: row.industry_code,
+    opportunity_score: row.opportunity_score,
+    underserved_businesses: row.underserved_businesses,
+    observed_businesses: row.observed_businesses,
+    expected_businesses_state_median_density: row.expected_businesses_state_median_density,
+    demand_index: row.demand_index,
+  }));
+
   const sourceManifest = fs.existsSync(RAW_FILES.sourceManifest)
     ? JSON.parse(fs.readFileSync(RAW_FILES.sourceManifest, 'utf8'))
     : null;
@@ -662,6 +674,7 @@ async function main() {
     },
     industries: summarizeIndustryRows(businessRows),
     sa2_rankings: sa2Rankings,
+    industry_sa2_scores: industrySa2Scores,
     top_opportunities: topOpportunities,
   };
 
@@ -669,9 +682,11 @@ async function main() {
 
   const outJsonProcessed = path.join(PROCESSED_DIR, 'opportunity-dataset.json');
   const outJsonPublic = path.join(PUBLIC_DATA_DIR, 'opportunity-dataset.json');
+  const outJsonDocs = path.join(DOCS_DATA_DIR, 'opportunity-dataset.json');
 
   await fsp.writeFile(outJsonProcessed, json);
   await fsp.writeFile(outJsonPublic, json);
+  await fsp.writeFile(outJsonDocs, json);
 
   const csvHeader = [
     'sa2_code',
@@ -709,6 +724,7 @@ async function main() {
 
   console.log(`Wrote ${path.relative(projectRoot, outJsonProcessed)}`);
   console.log(`Wrote ${path.relative(projectRoot, outJsonPublic)}`);
+  console.log(`Wrote ${path.relative(projectRoot, outJsonDocs)}`);
   console.log(`Wrote ${path.relative(projectRoot, outCsv)}`);
 }
 

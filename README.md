@@ -7,7 +7,7 @@ Australia-specific small business opportunity finder built from official ABS dat
 - Downloads current official datasets from ABS publication files and ABS Data API
 - Builds SA2-level opportunity metrics for focus small-business industries
 - Produces reproducible processed outputs with source manifest and formulas
-- Serves an interactive web UI for filtering by state, industry, and SA2
+- Serves an interactive map-first web UI for filtering by state, industry, and SA2
 
 ## Data Integrity Rules
 
@@ -29,16 +29,18 @@ Then open `http://127.0.0.1:4173/public/`
 
 - `scripts/fetch-data.mjs`: Downloads raw data from official URLs
 - `scripts/build-dataset.mjs`: Parses raw sources and computes opportunity outputs
+- `scripts/sync-pages-assets.mjs`: Mirrors publish assets between `public/` and `docs/`
 - `data/raw/`: Raw source files + source manifest
 - `data/processed/`: Processed JSON/CSV outputs
 - `public/`: Static visualization app
-- `docs/sources.md`: Source and methodology details
+- `docs/`: GitHub Pages app + documentation (`sources.md`, `design-requirements.md`, `architecture.md`)
 
 ## Output Files
 
 - `data/processed/opportunity-dataset.json`
 - `data/processed/top-opportunities.csv`
 - `public/data/opportunity-dataset.json`
+- `docs/data/opportunity-dataset.json`
 
 ## Notes
 

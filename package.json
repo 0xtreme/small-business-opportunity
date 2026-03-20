@@ -9,7 +9,8 @@
   "scripts": {
     "fetch:data": "node scripts/fetch-data.mjs",
     "build:data": "node scripts/build-dataset.mjs",
-    "build": "npm run fetch:data && npm run build:data",
+    "sync:pages": "node scripts/sync-pages-assets.mjs",
+    "build": "npm run fetch:data && npm run build:data && npm run sync:pages",
     "serve": "python3 -m http.server 4173"
   },
   "keywords": [],
