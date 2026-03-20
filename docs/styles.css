@@ -76,17 +76,34 @@ body {
   white-space: nowrap;
 }
 
-.top-badge {
-  align-self: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #ffd58c;
-  border: 1px solid rgba(248, 184, 77, 0.45);
+.status-wrap {
+  min-width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.boundary-status {
+  font-size: 0.76rem;
+  color: #d6e5ff;
+  text-align: right;
+}
+
+.boundary-progress {
+  width: min(270px, 32vw);
+  height: 8px;
   border-radius: 999px;
-  padding: 6px 10px;
-  background: rgba(248, 184, 77, 0.12);
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.boundary-progress-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #2c82b1, #f4bf4f, #f37a3f);
+  transition: width 0.35s ease;
 }
 
 .left-panel,
@@ -407,8 +424,23 @@ ol {
     overflow: auto;
   }
 
-  .top-badge {
-    align-self: flex-start;
+  .top-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .status-wrap {
+    min-width: 0;
+    width: 100%;
+    align-items: flex-start;
+  }
+
+  .boundary-status {
+    text-align: left;
+  }
+
+  .boundary-progress {
+    width: 100%;
   }
 
   .top-nav,
@@ -436,5 +468,33 @@ ol {
 
   .chart {
     height: 240px;
+  }
+}
+
+@media (max-width: 680px) {
+  .top-nav,
+  .left-panel,
+  .right-panel,
+  .bottom-panel {
+    margin: 8px;
+    padding: 10px;
+  }
+
+  #map {
+    width: calc(100% - 16px);
+    margin: 8px;
+    height: 46vh;
+  }
+
+  .left-panel h2 {
+    font-size: 1.04rem;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart {
+    height: 210px;
   }
 }

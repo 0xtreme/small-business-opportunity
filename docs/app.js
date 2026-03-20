@@ -8,6 +8,8 @@ const state = {
   dataset: null,
   map: null,
   boundaries: null,
+  boundaryTotal: 0,
+  boundaryLoaded: 0,
   currentFeatures: [],
   selectedIndustry: 'P',
   selectedState: 'ALL',
@@ -25,6 +27,8 @@ const state = {
 const el = {
   loading: document.getElementById('loading'),
   loadingText: document.getElementById('loadingText'),
+  boundaryStatus: document.getElementById('boundaryStatus'),
+  boundaryProgressBar: document.getElementById('boundaryProgressBar'),
   tooltip: document.getElementById('tooltip'),
   selectedTitle: document.getElementById('selectedTitle'),
   selectedMeta: document.getElementById('selectedMeta'),
@@ -48,6 +52,39 @@ function completeLoading() {
   if (el.loading) {
     el.loading.classList.add('done');
   }
+}
+
+function updateBoundaryProgress(loaded, total, options = {}) {
+  const safeLoaded = Number.isFinite(loaded) ? Math.max(0, loaded) : 0;
+  const safeTotal = Number.isFinite(total) ? Math.max(0, total) : 0;
+  const pct = safeTotal > 0 ? Math.min(100, (safeLoaded / safeTotal) * 100) : 0;
+
+  if (el.boundaryProgressBar) {
+    el.boundaryProgressBar.style.width = `${pct.toFixed(1)}%`;
+  }
+
+  if (!el.boundaryStatus) {
+    return;
+  }
+
+  if (options.error) {
+    el.boundaryStatus.textContent = options.error;
+    return;
+  }
+
+  if (safeTotal <= 0) {
+    el.boundaryStatus.textContent = options.label ?? 'Preparing SA2 boundaries...';
+    return;
+  }
+
+  if (options.done) {
+    el.boundaryStatus.textContent = `SA2 boundaries loaded (${num(safeLoaded)} / ${num(safeTotal)})`;
+    return;
+  }
+
+  el.boundaryStatus.textContent =
+    options.label ??
+    `Loading SA2 boundaries ${num(safeLoaded)} / ${num(safeTotal)} (${pct.toFixed(0)}%)`;
 }
 
 function num(value, digits = 0) {
@@ -101,26 +138,39 @@ function buildIndexes() {
   }
 }
 
-async function loadSa2Boundaries() {
+async function loadSa2BoundariesIncremental() {
   const countJson = await fetchJson(ABS_SA2_COUNT_URL);
   const total = Number(countJson.count ?? 0);
   if (!Number.isFinite(total) || total <= 0) {
     throw new Error('Unable to load SA2 boundary count from ABS geo service.');
   }
 
-  const pageSize = 2000;
-  const features = [];
+  state.boundaryTotal = total;
+  state.boundaryLoaded = 0;
+  state.boundaries = { type: 'FeatureCollection', features: [] };
+
+  const pageSize = 220;
+  updateBoundaryProgress(0, total, { label: 'Starting SA2 boundary stream...' });
+
   for (let offset = 0; offset < total; offset += pageSize) {
-    setLoading(`Loading SA2 boundaries (${Math.min(offset + pageSize, total)} / ${total})...`);
-    const url = `${ABS_SA2_QUERY_BASE}&resultRecordCount=${pageSize}&resultOffset=${offset}`;
+    const currentPageSize = Math.min(pageSize, total - offset);
+    const url = `${ABS_SA2_QUERY_BASE}&resultRecordCount=${currentPageSize}&resultOffset=${offset}`;
     // eslint-disable-next-line no-await-in-loop
     const page = await fetchJson(url);
-    if (Array.isArray(page.features)) {
-      features.push(...page.features);
+
+    if (Array.isArray(page.features) && page.features.length > 0) {
+      state.boundaries.features.push(...page.features);
+      state.boundaryLoaded = state.boundaries.features.length;
+
+      const isFirstChunk = offset === 0;
+      const isFinalChunk = state.boundaryLoaded >= total;
+
+      updateBoundaryProgress(state.boundaryLoaded, total);
+      applyFiltersAndRender({ skipCharts: !isFirstChunk && !isFinalChunk });
     }
   }
 
-  return { type: 'FeatureCollection', features };
+  updateBoundaryProgress(state.boundaryLoaded, total, { done: true });
 }
 
 function getScoreRow(sa2Code, industryCode) {
@@ -480,7 +530,7 @@ function renderMeta() {
   el.metaLine.textContent = `Generated ${generated} | Business year ${state.dataset.metadata.business_reference_year} | Population year ${state.dataset.metadata.population_reference_year}`;
 }
 
-function applyFiltersAndRender() {
+function applyFiltersAndRender(options = {}) {
   updateMapSourceAndStyle();
 
   const selectedVisible = state.selectedSa2Code
@@ -500,7 +550,9 @@ function applyFiltersAndRender() {
     renderSelectedPanel();
   }
 
-  renderCharts();
+  if (!options.skipCharts) {
+    renderCharts();
+  }
 }
 
 function initControls() {
@@ -554,95 +606,99 @@ function initControls() {
 }
 
 function initMap() {
-  state.map = new maplibregl.Map({
-    container: 'map',
-    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-    center: [134.5, -25.6],
-    zoom: 3.4,
-    attributionControl: false,
-  });
-
-  state.map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
-
-  state.map.on('load', () => {
-    state.map.addSource('sa2', {
-      type: 'geojson',
-      data: { type: 'FeatureCollection', features: [] },
-      promoteId: 'objectid',
+  return new Promise((resolve) => {
+    state.map = new maplibregl.Map({
+      container: 'map',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center: [134.5, -25.6],
+      zoom: 3.4,
+      attributionControl: false,
     });
 
-    state.map.addLayer({
-      id: 'sa2-fill',
-      type: 'fill',
-      source: 'sa2',
-      paint: {
-        'fill-color': '#263042',
-        'fill-opacity': 0.45,
-      },
-    });
+    state.map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'bottom-right');
 
-    state.map.addLayer({
-      id: 'sa2-outline',
-      type: 'line',
-      source: 'sa2',
-      paint: {
-        'line-color': [
-          'case',
-          ['boolean', ['feature-state', 'selected'], false],
-          '#ffe27c',
-          ['boolean', ['feature-state', 'hover'], false],
-          '#97d6ff',
-          '#202a3c',
-        ],
-        'line-width': [
-          'case',
-          ['boolean', ['feature-state', 'selected'], false],
-          2.1,
-          ['boolean', ['feature-state', 'hover'], false],
-          1.4,
-          0.45,
-        ],
-      },
-    });
+    state.map.on('load', () => {
+      state.map.addSource('sa2', {
+        type: 'geojson',
+        data: { type: 'FeatureCollection', features: [] },
+        promoteId: 'objectid',
+      });
 
-    state.map.on('mousemove', 'sa2-fill', (event) => {
-      const feature = event.features?.[0];
-      if (!feature || feature.properties.hidden === 1) {
-        hideTooltip();
-        return;
-      }
+      state.map.addLayer({
+        id: 'sa2-fill',
+        type: 'fill',
+        source: 'sa2',
+        paint: {
+          'fill-color': '#263042',
+          'fill-opacity': 0.45,
+        },
+      });
 
-      state.map.getCanvas().style.cursor = 'pointer';
+      state.map.addLayer({
+        id: 'sa2-outline',
+        type: 'line',
+        source: 'sa2',
+        paint: {
+          'line-color': [
+            'case',
+            ['boolean', ['feature-state', 'selected'], false],
+            '#ffe27c',
+            ['boolean', ['feature-state', 'hover'], false],
+            '#97d6ff',
+            '#202a3c',
+          ],
+          'line-width': [
+            'case',
+            ['boolean', ['feature-state', 'selected'], false],
+            2.1,
+            ['boolean', ['feature-state', 'hover'], false],
+            1.4,
+            0.45,
+          ],
+        },
+      });
 
-      if (state.hoveredFeatureId !== feature.id) {
+      state.map.on('mousemove', 'sa2-fill', (event) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.properties.hidden === 1) {
+          hideTooltip();
+          return;
+        }
+
+        state.map.getCanvas().style.cursor = 'pointer';
+
+        if (state.hoveredFeatureId !== feature.id) {
+          clearHover();
+          state.hoveredFeatureId = feature.id;
+          setFeatureState(feature.id, { hover: true });
+        }
+
+        showTooltip(event.point, feature);
+      });
+
+      state.map.on('mouseleave', 'sa2-fill', () => {
+        state.map.getCanvas().style.cursor = '';
         clearHover();
-        state.hoveredFeatureId = feature.id;
-        setFeatureState(feature.id, { hover: true });
-      }
+        hideTooltip();
+      });
 
-      showTooltip(event.point, feature);
+      state.map.on('click', 'sa2-fill', (event) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.properties.hidden === 1) {
+          return;
+        }
+        selectSa2(feature.properties.sa2_code_2021, feature.id, true);
+      });
+
+      applyFiltersAndRender();
+      resolve();
     });
-
-    state.map.on('mouseleave', 'sa2-fill', () => {
-      state.map.getCanvas().style.cursor = '';
-      clearHover();
-      hideTooltip();
-    });
-
-    state.map.on('click', 'sa2-fill', (event) => {
-      const feature = event.features?.[0];
-      if (!feature || feature.properties.hidden === 1) {
-        return;
-      }
-      selectSa2(feature.properties.sa2_code_2021, feature.id, true);
-    });
-
-    applyFiltersAndRender();
   });
 }
 
 async function load() {
   try {
+    updateBoundaryProgress(0, 0, { label: 'Preparing SA2 boundaries...' });
     setLoading('Loading opportunity dataset...');
     state.dataset = await fetchJson('./data/opportunity-dataset.json');
     buildIndexes();
@@ -650,17 +706,19 @@ async function load() {
     initControls();
 
     setLoading('Initializing map engine...');
-    initMap();
-
-    setLoading('Loading official ABS SA2 boundaries...');
-    state.boundaries = await loadSa2Boundaries();
-
-    setLoading('Joining scores with SA2 geographies...');
-    applyFiltersAndRender();
-
+    state.boundaries = { type: 'FeatureCollection', features: [] };
+    await initMap();
     completeLoading();
+
+    updateBoundaryProgress(0, 0, { label: 'Map ready. Loading SA2 boundaries in background...' });
+    loadSa2BoundariesIncremental().catch((error) => {
+      updateBoundaryProgress(0, 0, { error: `Boundary load error: ${error.message}` });
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
   } catch (error) {
     setLoading(`Error: ${error.message}`);
+    updateBoundaryProgress(0, 0, { error: `Startup error: ${error.message}` });
     // eslint-disable-next-line no-console
     console.error(error);
   }
