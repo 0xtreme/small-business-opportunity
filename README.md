@@ -1,4 +1,4 @@
-# brainstorm-au-data-apps
+# small-business-opportunity
 
 Australia-specific small business opportunity finder built from official ABS datasets.
 

@@ -1,5 +1,5 @@
 {
-  "name": "brainstorm-au-data-apps",
+  "name": "small-business-opportunity",
   "version": "1.0.0",
   "description": "Australia small business opportunity finder using official ABS datasets",
   "main": "public/app.js",
