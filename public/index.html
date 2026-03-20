@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AU Small Business Opportunity Finder</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <h1>Australia Small Business Opportunity Finder</h1>
+        <p>
+          Opportunity scores are derived from official ABS datasets only: business counts by SA2,
+          Census family/income indicators, and SA2 population.
+        </p>
+        <p id="metaLine" class="meta"></p>
+      </header>
+
+      <section class="controls">
+        <label>
+          State or territory
+          <select id="stateSelect"></select>
+        </label>
+
+        <label>
+          Industry
+          <select id="industrySelect"></select>
+        </label>
+
+        <label>
+          Search SA2
+          <input id="searchInput" type="text" placeholder="e.g. Parramatta" />
+        </label>
+      </section>
+
+      <section class="cards" id="summaryCards"></section>
+
+      <section class="panel">
+        <h2>Top SA2 Opportunity Scores</h2>
+        <div id="rankingChart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Industry Gap vs Demand (SA2)</h2>
+        <div id="industryScatter" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Top Suburb-Level Opportunities</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>SA2</th>
+                <th>State</th>
+                <th>Population</th>
+                <th>Top Industry Suggestions</th>
+                <th>Opportunity Score</th>
+              </tr>
+            </thead>
+            <tbody id="rankingTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Data source and method notes: <a href="../docs/sources.md" target="_blank" rel="noreferrer">docs/sources.md</a>
+        </p>
+      </footer>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

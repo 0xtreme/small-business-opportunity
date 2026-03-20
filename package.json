@@ -1,0 +1,22 @@
+{
+  "name": "brainstorm-au-data-apps",
+  "version": "1.0.0",
+  "description": "Australia small business opportunity finder using official ABS datasets",
+  "main": "public/app.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "fetch:data": "node scripts/fetch-data.mjs",
+    "build:data": "node scripts/build-dataset.mjs",
+    "build": "npm run fetch:data && npm run build:data",
+    "serve": "python3 -m http.server 4173"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
