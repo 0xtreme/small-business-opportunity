@@ -9,6 +9,9 @@
   --accent: #f8b84d;
   --danger: #ff6262;
   --ok: #39d0a3;
+  --edge-gap: 12px;
+  --bottom-panel-height: 246px;
+  --panel-bottom-gap: 12px;
 }
 
 * {
@@ -84,21 +87,21 @@ body {
 .right-panel {
   position: fixed;
   top: 96px;
+  bottom: calc(var(--edge-gap) + var(--bottom-panel-height) + var(--panel-bottom-gap));
   z-index: 18;
   border-radius: 12px;
   padding: 14px;
-  max-height: calc(100vh - 320px);
   overflow: auto;
 }
 
 .left-panel {
   left: 14px;
-  width: 360px;
+  width: 330px;
 }
 
 .right-panel {
   right: 14px;
-  width: 290px;
+  width: 280px;
 }
 
 .left-panel section + section {
@@ -228,10 +231,11 @@ body {
 
 .bottom-panel {
   position: fixed;
-  left: 14px;
-  right: 14px;
-  bottom: 12px;
+  left: var(--edge-gap);
+  right: var(--edge-gap);
+  bottom: var(--edge-gap);
   z-index: 18;
+  height: var(--bottom-panel-height);
   border-radius: 12px;
   padding: 10px;
   display: grid;
@@ -335,17 +339,21 @@ li + li {
 }
 
 @media (max-width: 1200px) {
+  :root {
+    --bottom-panel-height: 236px;
+  }
+
   .left-panel,
   .right-panel {
-    max-height: calc(100vh - 340px);
+    bottom: calc(var(--edge-gap) + var(--bottom-panel-height) + var(--panel-bottom-gap));
   }
 
   .left-panel {
-    width: 310px;
+    width: 300px;
   }
 
   .right-panel {
-    width: 260px;
+    width: 250px;
   }
 }
 

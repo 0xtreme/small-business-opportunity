@@ -12,8 +12,7 @@ const copyPairs = [
   ['public/styles.css', 'docs/styles.css'],
   ['public/data/opportunity-dataset.json', 'docs/data/opportunity-dataset.json'],
   ['docs/sources.md', 'public/sources.md'],
-  ['docs/design-requirements.md', 'public/design-requirements.md'],
-  ['docs/architecture.md', 'public/architecture.md'],
+  ['docs/how-it-works.md', 'public/how-it-works.md'],
 ];
 
 async function main() {
