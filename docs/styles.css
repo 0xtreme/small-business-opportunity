@@ -76,11 +76,17 @@ body {
   white-space: nowrap;
 }
 
-.top-links {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 10px;
+.top-badge {
+  align-self: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffd58c;
+  border: 1px solid rgba(248, 184, 77, 0.45);
+  border-radius: 999px;
+  padding: 6px 10px;
+  background: rgba(248, 184, 77, 0.12);
 }
 
 .left-panel,
@@ -131,6 +137,10 @@ body {
 .small {
   font-size: 0.8rem;
   line-height: 1.45;
+}
+
+a {
+  color: #9bd8ff;
 }
 
 .metric-grid {
@@ -338,6 +348,41 @@ li + li {
   margin-top: 4px;
 }
 
+ol {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.info-accordion + .info-accordion {
+  margin-top: 8px;
+}
+
+.info-accordion {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 8px 10px;
+}
+
+.info-accordion summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #deebff;
+}
+
+.info-accordion[open] summary {
+  margin-bottom: 8px;
+}
+
+.info-accordion p {
+  margin: 0 0 8px;
+}
+
+.info-accordion p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 1200px) {
   :root {
     --bottom-panel-height: 236px;
@@ -362,8 +407,8 @@ li + li {
     overflow: auto;
   }
 
-  .top-links {
-    justify-content: flex-start;
+  .top-badge {
+    align-self: flex-start;
   }
 
   .top-nav,

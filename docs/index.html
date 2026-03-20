@@ -24,10 +24,7 @@
           Interactive SA2 opportunity map using official ABS business, Census, and population data.
         </p>
       </div>
-      <nav class="top-links">
-        <a href="./sources.md" class="sources-link" target="_blank" rel="noreferrer">Data sources</a>
-        <a href="./how-it-works.md" class="sources-link" target="_blank" rel="noreferrer">How it works</a>
-      </nav>
+      <div class="top-badge">Official ABS data only</div>
     </header>
 
     <aside class="left-panel glass">
@@ -65,6 +62,63 @@
           <li>Underserved businesses: expected businesses minus observed businesses (floor at zero).</li>
           <li>Opportunity score: underserved businesses multiplied by demand factor.</li>
         </ul>
+      </section>
+
+      <section>
+        <h3>Help and Transparency</h3>
+
+        <details class="info-accordion">
+          <summary>How this works</summary>
+          <div class="small muted">
+            <p>
+              The app compares observed business counts to expected business counts for each SA2 and
+              industry, then adjusts by demand signals.
+            </p>
+            <p>
+              Expected business count is derived from state median business density. Opportunity score
+              is computed as underserved businesses multiplied by a demand factor.
+            </p>
+          </div>
+        </details>
+
+        <details class="info-accordion">
+          <summary>How to use this map</summary>
+          <ol class="small muted">
+            <li>Select an industry layer from the right panel.</li>
+            <li>Optionally filter by state or territory.</li>
+            <li>Search an SA2 name if you want a specific location.</li>
+            <li>Click a map polygon to inspect local metrics and top industry suggestions.</li>
+            <li>Use bottom charts to validate score evidence.</li>
+          </ol>
+        </details>
+
+        <details class="info-accordion">
+          <summary>Official data sources</summary>
+          <ul class="small muted">
+            <li>
+              ABS Counts of Australian Businesses (Data cube 8):<br />
+              <a href="https://www.abs.gov.au/statistics/economy/business-indicators/counts-australian-businesses-including-entries-and-exits/jul2021-jun2025" target="_blank" rel="noreferrer">Publication</a>
+              |
+              <a href="https://www.abs.gov.au/statistics/economy/business-indicators/counts-australian-businesses-including-entries-and-exits/jul2021-jun2025/8165DC08.xlsx" target="_blank" rel="noreferrer">Data cube 8 XLSX</a>
+            </li>
+            <li>
+              ABS Census 2021 G02 SA2:<br />
+              <a href="https://data.api.abs.gov.au/rest/data/C21_G02_SA2?format=csvfile" target="_blank" rel="noreferrer">API CSV</a>
+            </li>
+            <li>
+              ABS Census 2021 G29 SA2:<br />
+              <a href="https://data.api.abs.gov.au/rest/data/C21_G29_SA2?format=csvfile" target="_blank" rel="noreferrer">API CSV</a>
+            </li>
+            <li>
+              ABS Annual ERP ASGS2021:<br />
+              <a href="https://data.api.abs.gov.au/rest/data/ABS_ANNUAL_ERP_ASGS2021?format=csvfile" target="_blank" rel="noreferrer">API CSV</a>
+            </li>
+            <li>
+              ABS SA2 boundaries (ASGS 2021):<br />
+              <a href="https://geo.abs.gov.au/arcgis/rest/services/ASGS2021/SA2/MapServer/0?f=pjson" target="_blank" rel="noreferrer">Layer metadata</a>
+            </li>
+          </ul>
+        </details>
       </section>
     </aside>
 
